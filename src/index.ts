@@ -3,6 +3,11 @@ import apiRoutes from './routes/api'
 import dotenv from 'dotenv'
 import swaggerUi from 'swagger-ui-express'
 import swaggerJSDoc from 'swagger-jsdoc'
+import { databaseMiddleware } from './middlewares/databaseMiddleware'
+import { Account } from './models/Account'
+import { AppDataSource } from './config/data-source'
+import 'reflect-metadata';
+import router from './routes'
 
 dotenv.config()
 const app = express()
@@ -10,6 +15,7 @@ const port = process.env.PORT || 4000
 
 // Middleware
 app.use(express.json())
+
 // Swagger configuration
 const swaggerOptions = {
   swaggerDefinition: {
@@ -30,12 +36,17 @@ const swaggerOptions = {
 
 const swaggerDocs = swaggerJSDoc(swaggerOptions)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs))
-// Routes
-app.use('/api', apiRoutes)
 
-app.get('/', (req, res) => {
-  res.send('Welcome to the API!')
-})
+//Database
+app.use(databaseMiddleware);
+
+// Routes
+app.use('/api', router);
+
+// app.get('/', (req, res) => {
+//   res.send('Welcome to the API!')
+// })
+
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`)

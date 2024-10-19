@@ -25,11 +25,11 @@ const router = Router()
  *                     type: string
  *                     example: John Doe
  */
-router.get('/users', (req, res) => {
-  res.json([
-    { id: 1, name: 'John Doe' },
-    { id: 2, name: 'Jane Doe' }
-  ])
-})
+// router.get('/users', (req, res) => {
+//   res.json([
+//     { id: 1, name: 'John Doe' },
+//     { id: 2, name: 'Jane Doe' }
+//   ])
+// })
 
 export default router

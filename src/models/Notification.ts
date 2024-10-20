@@ -10,7 +10,7 @@ export class Notification {
   content: string;
 
   @ManyToOne(() => Account, account => account.username)
-  userId: string; // Liên kết với bảng Account
+  user: Account; 
 
   @Column({type: "varchar"})
   typeNotifiction: string;

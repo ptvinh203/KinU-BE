@@ -11,7 +11,7 @@ export class Expenditure {
   name: string;
 
   @OneToOne(() => TypeSprinding, typeSprinding => typeSprinding.id)
-  idTypeSpringding: TypeSprinding;
+  typeSprinding: TypeSprinding;
 
   @Column({ type: "decimal"}) 
   amount: number;

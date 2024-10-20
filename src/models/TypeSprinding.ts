@@ -22,5 +22,5 @@ export class TypeSprinding {
   idColor: string;
 
   @ManyToOne(() => Account, account => account.id)
-  user: Account; // Mối quan hệ với tài khoản người dùng
+  user: Account; 
 }

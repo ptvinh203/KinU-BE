@@ -7,7 +7,7 @@ export class EWallet {
   id: number;
 
   @ManyToOne(() => Account, account => account.id)
-  userId: string; // Liên kết với bảng Account
+  user: Account; // Liên kết với bảng Account
 
   @Column({type: "varchar"})
   phone: string;

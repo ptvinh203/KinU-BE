@@ -1,10 +1,6 @@
 import { DataSource } from 'typeorm';
-import { Account } from '../models/Account';
-import { TypeSprinding } from '@src/models/TypeSprinding';
-import { Expenditure } from '@src/models/Expenditure';
-import { EWallet } from '@src/models/EWallet';
-import { Notification } from '@src/models/Notification';
 import dotenv from 'dotenv'
+import { join } from 'path';
 
 dotenv.config();
 
@@ -15,7 +11,8 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_NAME || 'kinu',
-  synchronize: process.env.NODE_ENV === 'development', // Chỉ bật synchronize khi là development
-  logging: process.env.NODE_ENV === 'development',    // Bật logging trong môi trường dev
-  entities: [Account, TypeSprinding, Expenditure, EWallet, Notification],
+  synchronize: false,
+  logging: process.env.NODE_ENV === 'development', 
+  entities: [join(__dirname, '../models/*.ts')],
+  migrations: [join(__dirname, '../migrations/*.ts')]
 });

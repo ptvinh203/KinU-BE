@@ -10,7 +10,12 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prettier": "prettier --check .",
-    "prettier:fix": "prettier --write ."
+    "prettier:fix": "prettier --write .",
+    "typeorm": "typeorm-ts-node-commonjs",
+    "migration:generate": "npm run typeorm -- -d ./src/config/data-source.ts migration:generate ./src/migrations/newMigration",
+    "migration:run": "npm run typeorm migration:run -- -d ./src/config/data-source.ts",
+    "migration:revert": "npm run typeorm migration:revert -- -d ./src/config/data-source.ts",
+    "migration:auto": "npm run migration:generate -- -n InitDatabase && npm run migration:run"
   },
   "author": "",
   "license": "ISC",
@@ -38,6 +43,7 @@
     "typescript-eslint": "^8.10.0"
   },
   "dependencies": {
+    "@nestjs/typeorm": "^10.0.2",
     "bcryptjs": "^2.4.3",
     "connect-flash": "^0.1.1",
     "dotenv": "^16.4.5",
@@ -53,6 +59,7 @@
     "reflect-metadata": "^0.2.2",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
+    "ts-node": "^10.9.2",
     "twilio": "^5.3.4",
     "typeorm": "^0.3.20"
   }

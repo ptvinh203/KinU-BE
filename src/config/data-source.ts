@@ -1,8 +1,8 @@
-import { DataSource } from 'typeorm';
+import { DataSource } from 'typeorm'
 import dotenv from 'dotenv'
-import { join } from 'path';
+import { join } from 'path'
 
-dotenv.config();
+dotenv.config()
 
 export const AppDataSource = new DataSource({
   type: 'mysql', // Hoặc 'postgres'
@@ -12,7 +12,7 @@ export const AppDataSource = new DataSource({
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_NAME || 'kinu',
   synchronize: false,
-  logging: process.env.NODE_ENV === 'development', 
+  logging: process.env.NODE_ENV === 'development',
   entities: [join(__dirname, '../models/*.ts')],
   migrations: [join(__dirname, '../migrations/*.ts')]
-});
+})

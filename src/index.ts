@@ -1,10 +1,9 @@
 import express from 'express'
-import apiRoutes from './routes/api'
 import dotenv from 'dotenv'
 import swaggerUi from 'swagger-ui-express'
 import swaggerJSDoc from 'swagger-jsdoc'
 import { databaseMiddleware } from './middlewares/databaseMiddleware'
-import 'reflect-metadata';
+import 'reflect-metadata'
 import router from './routes'
 import ErrorHanlder from './middlewares/errorHandler'
 
@@ -37,15 +36,14 @@ const swaggerDocs = swaggerJSDoc(swaggerOptions)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs))
 
 //Database
-app.use(databaseMiddleware);
+app.use(databaseMiddleware)
 
 // Routes
-app.use('/api', router);
-app.use(ErrorHanlder);
+app.use('/api', router)
+app.use(ErrorHanlder)
 // app.get('/', (req, res) => {
 //   res.send('Welcome to the API!')
 // })
-
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`)

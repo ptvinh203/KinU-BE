@@ -1,27 +1,33 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToOne } from 'typeorm';
-import { Account } from './Account';
-import { TypeSprinding } from './TypeSprinding';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToOne
+} from 'typeorm'
+import { Account } from './Account'
+import { TypeSprinding } from './TypeSprinding'
 
 @Entity()
 export class Expenditure {
   @PrimaryGeneratedColumn()
-  id: number; 
+  id: number
 
   @Column({ type: 'varchar' })
-  name: string;
+  name: string
 
-  @OneToOne(() => TypeSprinding, typeSprinding => typeSprinding.id)
-  typeSprinding: TypeSprinding;
+  @OneToOne(() => TypeSprinding, (typeSprinding) => typeSprinding.id)
+  typeSprinding: TypeSprinding
 
-  @Column({ type: "decimal"}) 
-  amount: number;
+  @Column({ type: 'decimal' })
+  amount: number
 
   @Column({ type: 'datetime' })
-  dateSpinding: Date;
+  dateSpinding: Date
 
-  @ManyToOne(() => Account, account => account.id)
-  user: Account;
+  @ManyToOne(() => Account, (account) => account.id)
+  user: Account
 
   @Column({ type: 'boolean' })
-  paymentType: boolean;
+  paymentType: boolean
 }

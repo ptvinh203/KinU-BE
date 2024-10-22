@@ -9,7 +9,7 @@ const getAllIcon = async () => {
     const icons = await iconRepository.find()
     // Kiểm tra nếu colors rỗng
     if (icons.length === 0) {
-      throw new ValidationError('Không có màu nào trong cơ sở dữ liệu') // Có thể dùng ValidationError hoặc CustomAPIError khác
+      throw new ValidationError('Không có icon nào trong cơ sở dữ liệu') // Có thể dùng ValidationError hoặc CustomAPIError khác
     }
     return icons
   } catch (error) {

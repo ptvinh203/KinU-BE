@@ -1,9 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm'
 
 @Entity()
 export class Icon {
   @PrimaryGeneratedColumn()
-  id: string
+  id: number
 
   @Column({ type: 'varchar' })
   name: string

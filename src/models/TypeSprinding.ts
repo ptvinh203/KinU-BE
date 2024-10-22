@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm'
 import { Account } from './Account'
 import { Color } from './Color'
 import { Icon } from './Icon'
+import { IsNotEmpty } from 'class-validator'
 
 @Entity()
 export class TypeSprinding {
@@ -9,6 +10,7 @@ export class TypeSprinding {
   id: number // Tự động tăng
 
   @Column({ type: 'varchar' })
+  @IsNotEmpty({ message: 'Tên không được để trống' }) // Thêm validation
   name: string
 
   @Column({ type: 'decimal', precision: 10, scale: 2 }) // Số tiền dự tính

@@ -54,6 +54,43 @@ const creatTypeSprinding = async (req: Request) => {
   }
 }
 
+//Sửa 
+const editTypeSprinding = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params
+    const { name, estimatedAmount, abbreviation, colorId, iconId } = req.body
+
+    const updatedTypeSprinding = await TypeSprindingService.updateTypeSprinding(id, {
+      name,
+      estimatedAmount,
+      abbreviation,
+      colorId,
+      iconId
+    })
+
+    res.status(StatusCodes.OK).json({
+      status: 'OK',
+      data: updatedTypeSprinding
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+//Xóa
+const deleteTypeSprinding = async (id: string) => {
+  const typeSprindingRepository = getRepository(TypeSprinding)
+
+  const typeSprinding = await typeSprindingRepository.findOne(id)
+  if (!typeSprinding) {
+    throw new Error(`TypeSprinding with ID ${id} not found`)
+  }
+
+  await typeSprindingRepository.delete(id)
+}
+
 export const TypeSprindingService = {
-  creatTypeSprinding
+  creatTypeSprinding,
+  editTypeSprinding,
+  deleteTypeSprinding
 }

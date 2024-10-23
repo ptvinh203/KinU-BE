@@ -19,12 +19,6 @@ export class TypeSprinding {
   @Column({ type: 'varchar' })
   abbreviation: string
 
-  // @Column({ type: 'varchar' })
-  // idIcon: string
-
-  // @Column({ type: 'varchar' })
-  // idColor: string
-
   @ManyToOne(() => Account, (account) => account.id)
   user: Account
 

@@ -8,11 +8,12 @@ import { Color } from '@src/models/Color'
 import { Icon } from '@src/models/Icon'
 import NotFoundError from '@src/errors/NotFoundError'
 
+const userRepo = AppDataSource.getRepository(Account)
+
 const createAccount = async (req: Request) => {
   try {
     const { username, password, email, fullname, phone, birthday, gender } =
       req.body
-    const userRepo = AppDataSource.getRepository(Account)
     const existingUserByUsername = await userRepo.findOne({
       where: { username }
     })
@@ -69,7 +70,6 @@ const createAccount = async (req: Request) => {
 
 const getAllAccounts = async (req: Request) => {
   try {
-    const userRepo = AppDataSource.getRepository(Account)
     const accounts = await userRepo.find()
     return accounts
   } catch (error) {

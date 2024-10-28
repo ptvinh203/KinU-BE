@@ -6,13 +6,24 @@ import { databaseMiddleware } from './middlewares/databaseMiddleware'
 import 'reflect-metadata'
 import router from './routes'
 import ErrorHanlder from './middlewares/errorHandler'
+import cors from 'cors'
 
 dotenv.config()
 const app = express()
 const port = process.env.PORT || 4000
-
 // Middleware
 app.use(express.json())
+
+// Cấu hình CORS
+const corsOptions = {
+  origin: 'http://localhost:3000', // Chỉ định miền cho phép, có thể là array nếu có nhiều miền
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Các phương thức HTTP được phép
+  credentials: true, // Cho phép cookie từ các miền khác
+  optionsSuccessStatus: 204 // Để tương thích với một số trình duyệt cũ
+}
+
+// Sử dụng middleware CORS
+app.use(cors(corsOptions))
 
 // Swagger configuration
 const swaggerOptions = {

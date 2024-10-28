@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import { TypeSprindingService } from '@src/services/typeSprinding.service'
 import { StatusCodes } from 'http-status-codes'
+
 const CreateTypeSprinding = async (
   req: Request,
   res: Response,

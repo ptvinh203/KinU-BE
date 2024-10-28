@@ -13,6 +13,7 @@ const typeSprindingRepository = AppDataSource.getRepository(TypeSprinding)
 const iconRepository = AppDataSource.getRepository(Icon)
 const colorRepository = AppDataSource.getRepository(Color)
 const accountRepository = AppDataSource.getRepository(Account)
+
 const creatTypeSprinding = async (req: Request) => {
   try {
     const { name, estimatedAmount, abbreviation, idIcon, idColor, userId } =

@@ -24,5 +24,5 @@ export class Account {
   birthday: Date
 
   @Column({ type: 'int' })
-  gender: number // Sử dụng kiểu integer cho gender
+  gender: number 
 }

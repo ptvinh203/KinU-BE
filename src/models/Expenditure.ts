@@ -13,7 +13,7 @@ export class Expenditure {
   @PrimaryGeneratedColumn()
   id: number
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar'})
   name: string
 
   @OneToOne(() => TypeSprinding, (typeSprinding) => typeSprinding.id)

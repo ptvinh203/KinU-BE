@@ -3,6 +3,10 @@ import { Account } from '../models/Account'
 import { AppDataSource } from '../config/data-source'
 import BadRequestError from '@src/errors/BadRequestError'
 import bcrypt from 'bcryptjs'
+import { TypeSprinding } from '@src/models/TypeSprinding'
+import { Color } from '@src/models/Color'
+import { Icon } from '@src/models/Icon'
+import NotFoundError from '@src/errors/NotFoundError'
 
 const createAccount = async (req: Request) => {
   try {
@@ -32,6 +36,31 @@ const createAccount = async (req: Request) => {
     })
 
     await userRepo.save(newUser)
+
+    const typeSprindingRepo = AppDataSource.getRepository(TypeSprinding)
+    const colorRepo = AppDataSource.getRepository(Color)
+    const iconRepo = AppDataSource.getRepository(Icon)
+
+    const defaultColor = await colorRepo.findOne({ where: { id: 1 } })
+    if(!defaultColor){
+      throw new NotFoundError("Không tìm thấy color!")
+    }
+    const defaultIcon = await iconRepo.findOne({ where: { id: 1 } })
+    if(!defaultIcon){
+      throw new NotFoundError("Không tìm thấy icon!")
+    }
+    
+    const newTypeSprinding = typeSprindingRepo.create({
+      name: "Mặc định",
+      estimatedAmount: 0,
+      abbreviation: '',
+      color: defaultColor,
+      icon: defaultIcon,
+      user: newUser,
+    })
+
+    await typeSprindingRepo.save(newTypeSprinding)
+
     return newUser
   } catch (error) {
     throw error

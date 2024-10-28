@@ -6,12 +6,12 @@ export class Notification {
   @PrimaryGeneratedColumn()
   id: number
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar'})
   content: string
 
   @ManyToOne(() => Account, (account) => account.username)
   user: Account
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar'})
   typeNotifiction: string
 }

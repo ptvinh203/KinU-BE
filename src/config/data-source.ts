@@ -5,7 +5,7 @@ import { join } from 'path'
 dotenv.config()
 
 export const AppDataSource = new DataSource({
-  type: 'mysql', // Hoặc 'postgres'
+  type: 'mysql', 
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '3306'),
   username: process.env.DB_USER || 'root',
@@ -14,5 +14,8 @@ export const AppDataSource = new DataSource({
   synchronize: false,
   logging: process.env.NODE_ENV === 'development',
   entities: [join(__dirname, '../models/*.ts')],
-  migrations: [join(__dirname, '../migrations/*.ts')]
+  migrations: [join(__dirname, '../migrations/*.ts')],
+  extra: {
+    connectionLimit: 4,
+},
 })

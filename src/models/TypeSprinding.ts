@@ -7,23 +7,17 @@ import { IsNotEmpty } from 'class-validator'
 @Entity()
 export class TypeSprinding {
   @PrimaryGeneratedColumn()
-  id: number // Tự động tăng
+  id: number 
 
-  @Column({ type: 'varchar' })
-  @IsNotEmpty({ message: 'Tên không được để trống' }) // Thêm validation
+  @Column({ type: 'varchar'})
+  @IsNotEmpty({ message: 'Tên không được để trống' })
   name: string
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 }) // Số tiền dự tính
+  @Column({ type: 'decimal', precision: 10, scale: 2 }) 
   estimatedAmount: number
 
   @Column({ type: 'varchar' })
   abbreviation: string
-
-  // @Column({ type: 'varchar' })
-  // idIcon: string
-
-  // @Column({ type: 'varchar' })
-  // idColor: string
 
   @ManyToOne(() => Account, (account) => account.id)
   user: Account

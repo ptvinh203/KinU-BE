@@ -1,26 +1,29 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Account } from './Account';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm'
+import { Account } from './Account'
+import { Color } from './Color'
+import { Icon } from './Icon'
+import { IsNotEmpty } from 'class-validator'
 
 @Entity()
 export class TypeSprinding {
   @PrimaryGeneratedColumn()
-  id: number; // Tự động tăng
+  id: number 
+
+  @Column({ type: 'varchar'})
+  @IsNotEmpty({ message: 'Tên không được để trống' })
+  name: string
+
+  @Column({ type: 'decimal', precision: 10, scale: 2 }) 
+  estimatedAmount: number
 
   @Column({ type: 'varchar' })
-  name: string;
+  abbreviation: string
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 }) // Số tiền dự tính
-  estimatedAmount: number;
+  @ManyToOne(() => Account, (account) => account.id)
+  user: Account
 
-  @Column({ type: 'varchar' })
-  abbreviation: string;
-
-  @Column({ type: 'varchar' })
-  idIcon: string;
-
-  @Column({ type: 'varchar' })
-  idColor: string;
-
-  @ManyToOne(() => Account, account => account.id)
-  user: Account; 
+  @ManyToOne(() => Color, (color) => color.id)
+  color: Color
+  @ManyToOne(() => Icon, (icon) => icon.id)
+  icon: Icon
 }

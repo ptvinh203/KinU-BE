@@ -1,49 +1,83 @@
-import { Request, Response } from 'express';
-import { Account } from '../models/Account';
-import { AppDataSource } from '../config/data-source';
-import BadRequestError from '@src/errors/BadRequestError';
-import bcrypt from 'bcryptjs';
+import { Request, Response } from 'express'
+import { Account } from '../models/Account'
+import { AppDataSource } from '../config/data-source'
+import BadRequestError from '@src/errors/BadRequestError'
+import bcrypt from 'bcryptjs'
+import { TypeSprinding } from '@src/models/TypeSprinding'
+import { Color } from '@src/models/Color'
+import { Icon } from '@src/models/Icon'
+import NotFoundError from '@src/errors/NotFoundError'
+
+const userRepo = AppDataSource.getRepository(Account)
 
 const createAccount = async (req: Request) => {
   try {
-    const { username, password, email, fullname, phone, birthday, gender } = req.body;
-    const userRepo = AppDataSource.getRepository(Account);
-    const existingUserByUsername = await userRepo.findOne({ where: { username } });
+    const { username, password, email, fullname, phone, birthday, gender } =
+      req.body
+    const existingUserByUsername = await userRepo.findOne({
+      where: { username }
+    })
     if (existingUserByUsername) {
-      throw new BadRequestError('Tên đăng nhập đã tồn tại!');
+      throw new BadRequestError('Tên đăng nhập đã tồn tại!')
     }
-    const existingUserByEmail = await userRepo.findOne({ where: { email } });
+    const existingUserByEmail = await userRepo.findOne({ where: { email } })
     if (existingUserByEmail) {
-      throw new BadRequestError('Email đã tồn tại!');
+      throw new BadRequestError('Email đã tồn tại!')
     }
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10)
 
-    const newUser = userRepo.create({ 
-      username, 
-      password: hashedPassword, 
-      email, fullname, 
-      phone, birthday, 
-      gender 
-    });
+    const newUser = userRepo.create({
+      username,
+      password: hashedPassword,
+      email,
+      fullname,
+      phone,
+      birthday,
+      gender
+    })
+
+    await userRepo.save(newUser)
+
+    const typeSprindingRepo = AppDataSource.getRepository(TypeSprinding)
+    const colorRepo = AppDataSource.getRepository(Color)
+    const iconRepo = AppDataSource.getRepository(Icon)
+
+    const defaultColor = await colorRepo.findOne({ where: { id: 1 } })
+    if(!defaultColor){
+      throw new NotFoundError("Không tìm thấy color!")
+    }
+    const defaultIcon = await iconRepo.findOne({ where: { id: 1 } })
+    if(!defaultIcon){
+      throw new NotFoundError("Không tìm thấy icon!")
+    }
     
-    await userRepo.save(newUser);
-    return newUser;
+    const newTypeSprinding = typeSprindingRepo.create({
+      name: "Mặc định",
+      estimatedAmount: 0,
+      abbreviation: '',
+      color: defaultColor,
+      icon: defaultIcon,
+      user: newUser,
+    })
+
+    await typeSprindingRepo.save(newTypeSprinding)
+
+    return newUser
   } catch (error) {
-    throw error;
+    throw error
   }
-};
+}
 
 const getAllAccounts = async (req: Request) => {
-  try{
-    const userRepo = AppDataSource.getRepository(Account);
-    const accounts = await userRepo.find();
-    return accounts;
-  }catch(error){
-    throw error;
+  try {
+    const accounts = await userRepo.find()
+    return accounts
+  } catch (error) {
+    throw error
   }
 }
 
 export const AccountService = {
-  createAccount, 
+  createAccount,
   getAllAccounts
 }

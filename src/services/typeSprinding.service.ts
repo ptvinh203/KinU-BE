@@ -129,8 +129,30 @@ const deleteTypeSprinding = async (id: number) => {
   }
 }
 
-const getAllTypeSprindings = async () => {
+const getAllTypeSprindings = async (req: Request) => {
   try {
+    const userId = req.query.userId
+    let typeSprindings = []
+    if (userId) {
+      typeSprindings = await typeSprindingRepository.find({
+        where: { user: { id: +userId } },
+        relations: ['icon', 'color'],
+      })
+    } else {
+      typeSprindings = await typeSprindingRepository.find({
+        relations: ['icon', 'color', 'user'],
+      })
+    }
+    
+    return typeSprindings
+  } catch (error) {
+    throw error
+  }
+}
+
+const getTypeSprindingsByUserId = async (req: Request) => {
+  try {
+    const {userId} = req.query
     const typeSprindings = await typeSprindingRepository.find({
       relations: ['icon', 'color', 'user']
     })
@@ -139,6 +161,7 @@ const getAllTypeSprindings = async () => {
     throw error
   }
 }
+
 const getTypeSprindingById = async (id: number) => {
   try {
     // Tìm TypeSprinding theo ID
@@ -160,5 +183,6 @@ export const TypeSprindingService = {
   updateTypeSprinding,
   deleteTypeSprinding,
   getAllTypeSprindings,
-  getTypeSprindingById
+  getTypeSprindingById,
+  getTypeSprindingsByUserId
 }

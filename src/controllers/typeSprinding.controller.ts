@@ -85,10 +85,8 @@ const GetAllTypeSprindings = async (
   next: NextFunction
 ) => {
   try {
-    // Gọi service để lấy tất cả các TypeSprindings
-    const typeSprindings = await TypeSprindingService.getAllTypeSprindings()
+    const typeSprindings = await TypeSprindingService.getAllTypeSprindings(req)
 
-    // Trả về kết quả
     res.status(StatusCodes.OK).json({
       status: 'OK',
       data: typeSprindings
@@ -135,5 +133,5 @@ export const TypeSprindingController = {
   UpdateTypeSprinding,
   DeleteTypeSprinding,
   GetAllTypeSprindings,
-  GetTypeSprindingById
+  GetTypeSprindingById,
 }

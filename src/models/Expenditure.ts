@@ -16,10 +16,10 @@ export class Expenditure {
   @Column({ type: 'varchar'})
   name: string
 
-  @OneToOne(() => TypeSprinding, (typeSprinding) => typeSprinding.id)
+  @ManyToOne(() => TypeSprinding, (typeSprinding) => typeSprinding.id)
   typeSprinding: TypeSprinding
 
-  @Column({ type: 'decimal' })
+  @Column({ type: 'decimal', precision: 15, scale: 2 }) 
   amount: number
 
   @Column({ type: 'datetime' })

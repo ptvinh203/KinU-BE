@@ -4,31 +4,33 @@ import NotFoundError from '@src/errors/NotFoundError'
 import ValidationError from '@src/errors/ValidationError'
 import { Account } from '@src/models/Account'
 import { Color } from '@src/models/Color'
+import { Expenditure } from '@src/models/Expenditure'
 import { Icon } from '@src/models/Icon'
 import { TypeSprinding } from '@src/models/TypeSprinding'
 import { validate } from 'class-validator'
-import { NextFunction, Request } from 'express'
+import {  Request } from 'express'
+import typeSprindingSpentAmount from '../utils/typeSprindingSpentAmount'
 
 const typeSprindingRepository = AppDataSource.getRepository(TypeSprinding)
 const iconRepository = AppDataSource.getRepository(Icon)
 const colorRepository = AppDataSource.getRepository(Color)
 const accountRepository = AppDataSource.getRepository(Account)
 
+
 const creatTypeSprinding = async (req: Request) => {
   try {
-    const { name, estimatedAmount, abbreviation, iconId, colorId, userId } =
-      req.body
-    // Tìm các thực thể liên quan
+    const { name, estimatedAmount, abbreviation, iconId, colorId, userId } = req.body
+
     const icon = await iconRepository.findOne({ where: { id: iconId } })
     const color = await colorRepository.findOne({ where: { id: colorId } })
     const user = await accountRepository.findOne({ where: { id: userId } })
     if (!icon || !color || !user) {
-      throw new NotFoundError('Icon Or Color Or User Không tồn tại')
+      throw new NotFoundError('Icon hoặc Color hoặc User Không tồn tại')
     }
     if (!user) {
       throw new NotFoundError('User Không tồn tại')
     }
-    // Kiểm tra abbreviation có bị trùng không
+
     const existingTypeSprinding = await typeSprindingRepository.findOne({
       where: { abbreviation, user: { id: userId } }
     })
@@ -37,19 +39,18 @@ const creatTypeSprinding = async (req: Request) => {
     }
     const typeSprinding = typeSprindingRepository.create({
       name,
-      estimatedAmount,
+      estimatedAmount: +estimatedAmount,
       abbreviation,
       icon,
       color,
       user
     })
 
-    // Validate dữ liệu với class-validator (đảm bảo name không rỗng)
     const errors = await validate(typeSprinding)
     if (errors.length > 0) {
       throw new BadRequestError('Tên bị rỗng')
     }
-    // Lưu vào database
+
     const savedTypeSprinding = await typeSprindingRepository.save(typeSprinding)
 
     return savedTypeSprinding
@@ -62,7 +63,7 @@ const creatTypeSprinding = async (req: Request) => {
 const updateTypeSprinding = async (id: number, req: Request) => {
   try {
     const { name, estimatedAmount, abbreviation, iconId, colorId } = req.body
-    // Tìm kiếm TypeSprinding theo id
+
     const typeSprinding = await typeSprindingRepository.findOne({
       where: { id },
       relations: ['icon', 'color']
@@ -71,7 +72,6 @@ const updateTypeSprinding = async (id: number, req: Request) => {
       throw new NotFoundError('TypeSprinding Không tồn tại')
     }
 
-    // Cập nhật các thuộc tính nếu có dữ liệu
     if (name !== undefined) {
       typeSprinding.name = name
     }
@@ -82,7 +82,6 @@ const updateTypeSprinding = async (id: number, req: Request) => {
       typeSprinding.abbreviation = abbreviation
     }
 
-    // Tìm color nếu có colorId
     if (colorId !== undefined) {
       const color = await colorRepository.findOne({ where: { id: colorId } })
       if (!color) {
@@ -91,7 +90,6 @@ const updateTypeSprinding = async (id: number, req: Request) => {
       typeSprinding.color = color
     }
 
-    // Tìm icon nếu có iconId
     if (iconId !== undefined) {
       const icon = await iconRepository.findOne({ where: { id: iconId } })
       if (!icon) {
@@ -99,7 +97,7 @@ const updateTypeSprinding = async (id: number, req: Request) => {
       }
       typeSprinding.icon = icon
     }
-    // Lưu thay đổi
+
     const typeSprindingUpdate =
       await typeSprindingRepository.save(typeSprinding)
 
@@ -112,7 +110,6 @@ const updateTypeSprinding = async (id: number, req: Request) => {
 //Xóa
 const deleteTypeSprinding = async (id: number) => {
   try {
-    // Tìm kiếm TypeSprinding theo id
     const typeSprinding = await typeSprindingRepository.findOne({
       where: { id }
     })
@@ -120,7 +117,6 @@ const deleteTypeSprinding = async (id: number) => {
       throw new NotFoundError('TypeSprinding Không tồn tại')
     }
 
-    // Xóa TypeSprinding
     await typeSprindingRepository.remove(typeSprinding)
 
     return { message: 'TypeSprinding đã được xóa thành công' }
@@ -131,58 +127,61 @@ const deleteTypeSprinding = async (id: number) => {
 
 const getAllTypeSprindings = async (req: Request) => {
   try {
-    const userId = req.query.userId
-    let typeSprindings = []
+    const userId = req.query.userId;
+    let typeSprindings = [];
+
     if (userId) {
       typeSprindings = await typeSprindingRepository.find({
         where: { user: { id: +userId } },
-        relations: ['icon', 'color'],
-      })
+        relations: ['icon', 'color', 'expenditure'], 
+      });
     } else {
       typeSprindings = await typeSprindingRepository.find({
-        relations: ['icon', 'color', 'user'],
-      })
+        relations: ['icon', 'color', 'user', 'expenditure'],
+      });
     }
-    
-    return typeSprindings
-  } catch (error) {
-    throw error
-  }
-}
 
-const getTypeSprindingsByUserId = async (req: Request) => {
-  try {
-    const {userId} = req.query
-    const typeSprindings = await typeSprindingRepository.find({
-      relations: ['icon', 'color', 'user']
+    const result = typeSprindings.map(typeSprinding => {
+      const spentAmount = typeSprinding.expenditure ? typeSprindingSpentAmount(typeSprinding.expenditure) : 0
+      return {
+        ...typeSprinding,
+        spentAmount 
+      }
     })
-    return typeSprindings
+
+    return result
   } catch (error) {
-    throw error
+    throw error;
   }
 }
 
 const getTypeSprindingById = async (id: number) => {
   try {
-    // Tìm TypeSprinding theo ID
     const typeSprinding = await typeSprindingRepository.findOne({
       where: { id },
-      relations: ['icon', 'color', 'user']
+      relations: ['icon', 'color', 'expenditure']
     })
-    console.log('🚀 ~ getTypeSprindingById ~ id:', id)
     if (!typeSprinding) {
       throw new NotFoundError('TypeSprinding không tồn tại')
     }
-    return typeSprinding
+    if (!typeSprinding.expenditure) {
+      throw new BadRequestError("Danh sách chi tiêu không hợp lệ!");
+    }
+
+    const spentAmount = typeSprindingSpentAmount(typeSprinding.expenditure)
+    return {
+      ...typeSprinding,
+      spentAmount
+    }
   } catch (error) {
     throw error
   }
 }
+
 export const TypeSprindingService = {
   creatTypeSprinding,
   updateTypeSprinding,
   deleteTypeSprinding,
   getAllTypeSprindings,
-  getTypeSprindingById,
-  getTypeSprindingsByUserId
+  getTypeSprindingById
 }

@@ -26,7 +26,7 @@ const UpdateTypeSprinding = async (
 ) => {
   try {
     const { id } = req.params
-    // Parse `id` and ensure it’s a number
+
     const parsedId = parseInt(id as string, 10)
     if (isNaN(parsedId)) {
       return res.status(StatusCodes.BAD_REQUEST).json({
@@ -34,7 +34,7 @@ const UpdateTypeSprinding = async (
         message: 'Invalid ID provided'
       })
     }
-    // Gọi service để cập nhật
+
     const updatedType = await TypeSprindingService.updateTypeSprinding(
       parsedId,
       req
@@ -56,9 +56,8 @@ const DeleteTypeSprinding = async (
   next: NextFunction
 ) => {
   try {
-    const { id } = req.params // Extract id from query parameters
+    const { id } = req.params 
 
-    // Parse id and ensure it’s a valid number
     const parsedId = parseInt(id as string, 10)
     if (isNaN(parsedId)) {
       return res.status(StatusCodes.BAD_REQUEST).json({
@@ -67,10 +66,8 @@ const DeleteTypeSprinding = async (
       })
     }
 
-    // Gọi service để xóa TypeSprinding
     const result = await TypeSprindingService.deleteTypeSprinding(parsedId)
 
-    // Trả về kết quả thành công
     res.status(StatusCodes.OK).json({
       status: 'OK',
       message: result.message
@@ -106,7 +103,6 @@ const GetTypeSprindingById = async (
 
     // Parse id để đảm bảo đó là số hợp lệ
     const parsedId = parseInt(id as string, 10)
-    console.log('🚀 ~ parsedId:', parsedId)
     if (isNaN(parsedId)) {
       return res.status(StatusCodes.BAD_REQUEST).json({
         status: 'error',
@@ -114,11 +110,9 @@ const GetTypeSprindingById = async (
       })
     }
 
-    // Gọi service để tìm TypeSprinding theo ID
     const typeSprinding =
       await TypeSprindingService.getTypeSprindingById(parsedId)
 
-    // Trả về kết quả
     res.status(StatusCodes.OK).json({
       status: 'OK',
       data: typeSprinding

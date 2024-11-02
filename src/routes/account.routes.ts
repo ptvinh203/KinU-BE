@@ -1,4 +1,4 @@
-import { AccountController } from './../controllers/account.controller'
+import { AccountController } from '../controllers/account.controller'
 import express from 'express'
 import { accountValidation } from '@src/validations/authValidation'
 

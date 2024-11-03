@@ -1,3 +1,4 @@
+import { Notification } from '@src/models/Notification';
 import { AppDataSource } from "@src/config/data-source"
 import BadRequestError from "@src/errors/BadRequestError"
 import NotFoundError from "@src/errors/NotFoundError"
@@ -6,10 +7,13 @@ import { Expenditure } from "@src/models/Expenditure"
 import { TypeSprinding } from "@src/models/TypeSprinding"
 import addSevenHours from "@src/utils/addSevenHours"
 import { Request } from "express"
+import { NotificationService } from './notification.service';
+
 
 const expenditureRepository = AppDataSource.getRepository(Expenditure)
 const typeSprindingRepository = AppDataSource.getRepository(TypeSprinding)
 const userRepository = AppDataSource.getRepository(Account)
+const notificationRepository = AppDataSource.getRepository(Notification)
 
 const createExpenditure = async (req: Request) => {
     try {
@@ -29,7 +33,7 @@ const createExpenditure = async (req: Request) => {
             throw new NotFoundError("Không tìm thấy loại chi tiêu!")
         }
 
-        const newExpenditure = expenditureRepository.create({
+        const newExpenditure: Expenditure = expenditureRepository.create({
             name,
             typeSprinding,
             amount: +amount,
@@ -38,6 +42,9 @@ const createExpenditure = async (req: Request) => {
             paymentType: false
         })
         const savedExpenditure = await expenditureRepository.save(newExpenditure)
+
+        await NotificationService.createNotification(newExpenditure)
+        
         return savedExpenditure
     } catch(error){
         throw error

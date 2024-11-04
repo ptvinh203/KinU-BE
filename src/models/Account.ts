@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column,OneToMany  } from 'typeorm'
+import { Notification } from './Notification'
 
 @Entity()
 export class Account {
@@ -25,4 +26,7 @@ export class Account {
 
   @Column({ type: 'int' })
   gender: number 
+
+  @OneToMany(() => Notification, (notification) => notification.user)
+  notifications: Notification[];
 }

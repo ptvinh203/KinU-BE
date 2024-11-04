@@ -1,17 +1,23 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm'
-import { Account } from './Account'
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
+import { Account } from './Account';
 
 @Entity()
 export class Notification {
   @PrimaryGeneratedColumn()
-  id: number
+  id: number;
 
   @Column({ type: 'varchar'})
-  content: string
+  content: string;
 
-  @ManyToOne(() => Account, (account) => account.username)
-  user: Account
+  @Column({ type: 'varchar' })
+  typeNotifiction: string;
 
-  @Column({ type: 'varchar'})
-  typeNotifiction: string
+  @Column({ type: 'timestamp' })
+  createdAt: Date;
+
+  @Column({type: 'boolean'})
+  read: boolean
+
+  @ManyToOne(() => Account, (account) => account.notifications)
+  user: Account;
 }

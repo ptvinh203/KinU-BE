@@ -141,13 +141,14 @@ const getAllTypeSprindings = async (req: Request) => {
       });
     }
 
-    const result = typeSprindings.map(typeSprinding => {
-      const spentAmount = typeSprinding.expenditure ? typeSprindingSpentAmount(typeSprinding.expenditure) : 0
+    const result = await Promise.all(typeSprindings.map(async (typeSprinding) => {
+      const spentAmount = typeSprinding.expenditure ? await typeSprindingSpentAmount(typeSprinding.id) : 0;
+    
       return {
         ...typeSprinding,
         spentAmount 
-      }
-    })
+      };
+    }));
 
     return result
   } catch (error) {
@@ -168,7 +169,7 @@ const getTypeSprindingById = async (id: number) => {
       throw new BadRequestError("Danh sách chi tiêu không hợp lệ!");
     }
 
-    const spentAmount = typeSprindingSpentAmount(typeSprinding.expenditure)
+    const spentAmount = typeSprindingSpentAmount(typeSprinding.id)
     return {
       ...typeSprinding,
       spentAmount

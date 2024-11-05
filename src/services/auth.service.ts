@@ -8,12 +8,12 @@ import BadRequestError from '@src/errors/BadRequestError'
 
 const login = async (req: Request) => {
   try {
-    const { username, password } = req.body
+    const { email, password } = req.body
     const userRepo = AppDataSource.getRepository(Account)
-    if(!username || !password){
-      throw new BadRequestError("Tham số username và password không hợp lệ!")
+    if (!email || !password) {
+      throw new BadRequestError('Tham số email và password không hợp lệ!')
     }
-    const existingAccount = await userRepo.findOne({ where: { username } })
+    const existingAccount = await userRepo.findOne({ where: { email } })
 
     if (!existingAccount) {
       throw new NotFoundError('Tài khoản không hợp lệ!')

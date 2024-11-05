@@ -16,6 +16,6 @@ export const AppDataSource = new DataSource({
   entities: [join(__dirname, '../models/*.ts')],
   migrations: [join(__dirname, '../migrations/*.ts')],
   extra: {
-    connectionLimit: 10,
+    connectionLimit: 5,
 },
 })

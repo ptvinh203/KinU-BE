@@ -19,6 +19,40 @@ const createExpenditure = async (
     next(error)
   }
 }
+
+const updateExpenditure = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const result = await ExpenditureService.updateExpenditure(req)
+    return res.status(StatusCodes.OK).json({
+      status: 'OK',
+      data: result
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const deleteExpenditure = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const result = await ExpenditureService.deleteExpenditure(req)
+    res.status(StatusCodes.OK).json({
+      status: 'OK',
+      message: result.message
+    })
+  } catch (error) {
+    next(error)
+  }
+}
 export const ExpenditureController = {
-  createExpenditure
+  createExpenditure,
+  updateExpenditure,
+  deleteExpenditure
 }

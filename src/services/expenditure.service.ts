@@ -51,6 +51,78 @@ const createExpenditure = async (req: Request) => {
     throw error
   }
 }
+const updateExpenditure = async (req: Request) => {
+  try {
+    const { name, tsId, amount, dateSpinding } = req.body
+    const { id } = req.params // Get id  from URL parameters
+
+    if (!id || amount < 0) {
+      throw new BadRequestError('Dữ liệu từ req không hợp lệ!')
+    }
+
+    // Find the expenditure to update
+    const expenditure = await expenditureRepository.findOne({
+      where: { id: parseInt(id) },
+      relations: ['typeSprinding', 'user']
+    })
+    if (!expenditure) {
+      throw new NotFoundError('Không tìm thấy khoản chi tiêu!')
+    }
+
+    // If a new type ID is provided, validate and update it
+    if (tsId) {
+      const typeSprinding = await typeSprindingRepository.findOne({
+        where: { id: tsId }
+      })
+      if (!typeSprinding) {
+        throw new NotFoundError('Không tìm thấy loại chi tiêu!')
+      }
+      expenditure.typeSprinding = typeSprinding
+    }
+
+    // Update other fields if provided
+    if (name) expenditure.name = name
+    if (amount) expenditure.amount = +amount
+    if (dateSpinding)
+      expenditure.dateSpinding = addSevenHours(new Date(dateSpinding))
+
+    // Save the updated expenditure
+    const updatedExpenditure = await expenditureRepository.save(expenditure)
+
+    return await expenditureRepository.findOne({
+      where: { id: updatedExpenditure.id },
+      relations: ['typeSprinding', 'user']
+    })
+  } catch (error) {
+    throw error
+  }
+}
+const deleteExpenditure = async (req: Request) => {
+  try {
+    const { id } = req.params // Get id from URL parameters
+
+    if (!id) {
+      throw new BadRequestError('id không hợp lệ!')
+    }
+
+    // Find the expenditure to delete
+    const expenditure = await expenditureRepository.findOne({
+      where: { id: parseInt(id) }
+    })
+    if (!expenditure) {
+      throw new NotFoundError('Không tìm thấy khoản chi tiêu!')
+    }
+
+    // Delete the expenditure
+    await expenditureRepository.remove(expenditure)
+
+    return { message: 'Xóa khoản chi tiêu thành công!' }
+  } catch (error) {
+    throw error
+  }
+}
 export const ExpenditureService = {
-  createExpenditure
+  createExpenditure,
+  updateExpenditure,
+  deleteExpenditure
 }

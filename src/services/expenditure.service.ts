@@ -18,6 +18,7 @@ const notificationRepository = AppDataSource.getRepository(Notification)
 const createExpenditure = async (req: Request) => {
   try {
     const { name, tsId, amount, userId, dateSpinding } = req.body
+    console.log(req.body)
 
     if (!tsId || !amount || !userId || amount < 0 || !dateSpinding) {
       throw new BadRequestError('Dữ liệu từ req không hợp lệ!')
@@ -65,6 +66,7 @@ const updateExpenditure = async (req: Request) => {
       where: { id: parseInt(id) },
       relations: ['typeSprinding', 'user']
     })
+
     if (!expenditure) {
       throw new NotFoundError('Không tìm thấy khoản chi tiêu!')
     }
@@ -79,7 +81,10 @@ const updateExpenditure = async (req: Request) => {
       }
       expenditure.typeSprinding = typeSprinding
     }
-
+    const ts = await TypeSprindingService.getTypeSprindingById(
+      expenditure?.typeSprinding.id
+    )
+    expenditure.typeSprinding = ts
     // Update other fields if provided
     if (name) expenditure.name = name
     if (amount) expenditure.amount = +amount
@@ -91,7 +96,15 @@ const updateExpenditure = async (req: Request) => {
 
     return await expenditureRepository.findOne({
       where: { id: updatedExpenditure.id },
-      relations: ['typeSprinding', 'user']
+      relations: [
+        'typeSprinding',
+        'user',
+        'typeSprinding.color',
+        'typeSprinding.icon'
+      ],
+      order: {
+        dateSpinding: 'DESC'
+      }
     })
   } catch (error) {
     throw error
@@ -151,12 +164,26 @@ const getAllExpenditures = async (req: Request) => {
           user: { id: Number(userId) },
           typeSprinding: { id: Number(tsId) }
         },
-        relations: ['typeSprinding']
+        relations: [
+          'typeSprinding',
+          'typeSprinding.color',
+          'typeSprinding.icon'
+        ],
+        order: {
+          dateSpinding: 'DESC'
+        }
       })
     } else {
       expenditures = await expenditureRepository.find({
         where: { user: { id: Number(userId) } },
-        relations: ['typeSprinding', 'typeSprinding.icon', 'typeSprinding.color']
+        relations: [
+          'typeSprinding',
+          'typeSprinding.color',
+          'typeSprinding.icon'
+        ],
+        order: {
+          dateSpinding: 'DESC'
+        }
       })
     }
 
@@ -178,7 +205,10 @@ const getExpenditureById = async (req: Request) => {
     }
     const expenditure = await expenditureRepository.findOne({
       where: { id: +exId },
-      relations: ['typeSprinding']
+      relations: ['typeSprinding', 'typeSprinding.color', 'typeSprinding.icon'],
+      order: {
+        dateSpinding: 'DESC'
+      }
     })
     return expenditure
   } catch (error) {

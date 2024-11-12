@@ -52,7 +52,7 @@ const createAccount = async (req: Request) => {
     }
     
     const newTypeSprinding = typeSprindingRepo.create({
-      name: "Mặc định",
+      name: "Chi tiêu khác",
       estimatedAmount: +0,
       abbreviation: '',
       color: defaultColor,

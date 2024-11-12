@@ -18,7 +18,6 @@ const notificationRepository = AppDataSource.getRepository(Notification)
 const createExpenditure = async (req: Request) => {
   try {
     const { name, tsId, amount, userId, dateSpinding } = req.body
-    console.log(req.body)
 
     if (!tsId || !amount || !userId || amount < 0 || !dateSpinding) {
       throw new BadRequestError('Dữ liệu từ req không hợp lệ!')
@@ -157,7 +156,7 @@ const getAllExpenditures = async (req: Request) => {
     } else {
       expenditures = await expenditureRepository.find({
         where: { user: { id: Number(userId) } },
-        relations: ['typeSprinding']
+        relations: ['typeSprinding', 'typeSprinding.icon', 'typeSprinding.color']
       })
     }
 

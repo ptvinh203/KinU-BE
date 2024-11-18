@@ -7,7 +7,7 @@ export class EWallet {
   id: number
 
   @ManyToOne(() => Account, (account) => account.id)
-  user: Account // Liên kết với bảng Account
+  user: Account 
 
   @Column({ type: 'varchar' })
   phone: string
@@ -15,6 +15,6 @@ export class EWallet {
   @Column({ type: 'varchar' })
   pinCode: string
 
-  @Column({ type: 'decimal' })
-  balance: number // Sử dụng kiểu money
+  @Column({ type: 'decimal', precision: 15, scale: 2  })
+  balance: number 
 }

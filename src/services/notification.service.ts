@@ -7,6 +7,7 @@ import addSevenHours from "@src/utils/addSevenHours"
 import { Request } from "express"
 import typeSprindingSpentAmount from '../utils/typeSprindingSpentAmount'
 import { Account } from "@src/models/Account"
+import {io} from "../socket/socket"
 
 const notificationRepository = AppDataSource.getRepository(Notification)
 const userRepository = AppDataSource.getRepository(Account)
@@ -21,7 +22,45 @@ const getNotificationByUserId = async (req: Request) => {
         }
 
         const notifications = await notificationRepository.find({
+            where: { user: { id: parsedUserId }},
+            order: { id: 'DESC' }});
+
+        return notifications;
+    } catch (error) {
+        throw error;
+    }
+}
+
+const getUnReadNotification = async (req: Request) => {
+    try {
+        const { userId } = req.query;
+
+        const parsedUserId = Number(userId);
+        if (!parsedUserId) {
+            throw new BadRequestError("Tham số userId không hợp lệ!");
+        }
+
+        const notifications = await notificationRepository.find({
             where: { user: { id: parsedUserId }, read: false },
+            order: { id: 'DESC' }});
+
+        return notifications;
+    } catch (error) {
+        throw error;
+    }
+}
+
+const getReadNotification = async (req: Request) => {
+    try {
+        const { userId } = req.query;
+
+        const parsedUserId = Number(userId);
+        if (!parsedUserId) {
+            throw new BadRequestError("Tham số userId không hợp lệ!");
+        }
+
+        const notifications = await notificationRepository.find({
+            where: { user: { id: parsedUserId }, read: true },
             order: { id: 'DESC' }});
 
         return notifications;
@@ -48,7 +87,9 @@ const createNotification = async (expenditure: Expenditure) => {
             read: false
         });
 
-        await notificationRepository.save(newNotification);
+        const savedNotification = await notificationRepository.save(newNotification) as Notification;
+
+        io.emit('notification', savedNotification);
     } catch (error) {
         throw error;
     }
@@ -106,5 +147,7 @@ export const NotificationService = {
     getNotificationByUserId,
     createNotification,
     setReadNotification,
-    setReadAllNotification
+    setReadAllNotification,
+    getUnReadNotification,
+    getReadNotification
 }

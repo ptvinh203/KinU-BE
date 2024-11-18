@@ -6,6 +6,7 @@ import ColorRoutes from './color.routes'
 import IconRoutes from './icon.routes'
 import ExpenditureRoutes from "./expenditure.routes"
 import NotificationRoutes from "./notification.routes"
+import EWalletRoutes from "./ewallet.routes"
 
 const router = Router()
 // router.get('/', (req: Request, res: Response) => {
@@ -22,5 +23,6 @@ router.use('/color', ColorRoutes)
 router.use('/icon', IconRoutes)
 router.use('/expenditure', ExpenditureRoutes)
 router.use('/notification', NotificationRoutes)
+router.use('/ewallet', EWalletRoutes)
 
 export default router

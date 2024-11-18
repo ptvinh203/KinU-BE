@@ -13,7 +13,6 @@ import { TypeSprindingService } from './typeSprinding.service'
 const expenditureRepository = AppDataSource.getRepository(Expenditure)
 const typeSprindingRepository = AppDataSource.getRepository(TypeSprinding)
 const userRepository = AppDataSource.getRepository(Account)
-const notificationRepository = AppDataSource.getRepository(Notification)
 
 const createExpenditure = async (req: Request) => {
   try {

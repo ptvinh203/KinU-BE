@@ -13,7 +13,7 @@ const login = async (req: Request) => {
     if (!email || !password) {
       throw new BadRequestError('Tham số email và password không hợp lệ!')
     }
-    const existingAccount = await userRepo.findOne({ where: { email } })
+    const existingAccount = await userRepo.findOne({ where: { email }, relations: ['wallets'] })
 
     if (!existingAccount) {
       throw new NotFoundError('Tài khoản không hợp lệ!')

@@ -12,14 +12,12 @@ import {Request} from "express";
 const userRepository = AppDataSource.getRepository(Account);
 const ewalletRepository = AppDataSource.getRepository(EWallet);
 const expenditureRepository = AppDataSource.getRepository(Expenditure);
-const typeSprindingRepository = AppDataSource.getRepository(TypeSprinding)
-
-
+const typeSprindingRepository = AppDataSource.getRepository(TypeSprinding);
 
 const linkEWallet = async (req: Request) => {
     try{
         const {userId, phone, pinCode, balance} = req.body;
-        if(!userId || !phone || !pinCode || !balance){
+        if(!userId || !phone || !pinCode){
             throw new BadRequestError("Tham số req không hợp lệ!");
         }
 
@@ -73,11 +71,13 @@ const unlinkEWallet = async (req: Request) => {
 
 const payment = async (req: Request) => {
     try{
-        const {price, msg, type, user_email} = req.body;
-        if(!price || !msg || !type || !user_email){
+        const {price, msg, user_email} = req.body;
+        if(!price || !msg || !user_email){
             throw new BadRequestError("Tham số từ req không hợp lệ!");
         }
 
+        const type = msg.split(" ")[0];
+        
         const user = await userRepository.findOne({where: {email: user_email}, relations: ["wallets"]});
         if(!user){
             throw new NotFoundError("Không tìm thấy người dùng!");

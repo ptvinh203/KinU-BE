@@ -15,204 +15,180 @@ const typeSprindingRepository = AppDataSource.getRepository(TypeSprinding)
 const userRepository = AppDataSource.getRepository(Account)
 
 const createExpenditure = async (req: Request) => {
-  try {
-    const { name, tsId, amount, userId, dateSpinding } = req.body
-    console.log(req.body)
+  const { name, tsId, amount, userId, dateSpinding } = req.body
+  console.log(req.body)
 
-    if (!tsId || !amount || !userId || amount < 0 || !dateSpinding) {
-      throw new BadRequestError('Dữ liệu từ req không hợp lệ!')
-    }
+  if (!tsId || !amount || !userId || amount < 0 || !dateSpinding) {
+    throw new BadRequestError('Dữ liệu từ req không hợp lệ!')
+  }
 
-    const user = await userRepository.findOne({ where: { id: userId } })
-    if (!user) {
-      throw new NotFoundError('Không tìm thấy người dùng!')
-    }
+  const user = await userRepository.findOne({ where: { id: userId } })
+  if (!user) {
+    throw new NotFoundError('Không tìm thấy người dùng!')
+  }
+
+  const typeSprinding = await typeSprindingRepository.findOne({
+    where: { id: tsId }
+  })
+
+  if (!typeSprinding) {
+    throw new NotFoundError('Không tìm thấy loại chi tiêu!')
+  }
+
+  const newExpenditure: Expenditure = expenditureRepository.create({
+    name,
+    typeSprinding,
+    amount: +amount,
+    dateSpinding: dateSpinding,
+    user,
+    paymentType: false
+  })
+  const savedExpenditure = await expenditureRepository.save(newExpenditure)
+
+  // Update current balance
+  user.currentBalance -= +amount
+  await userRepository.save(user)
+
+  await NotificationService.createNotification(newExpenditure)
+  return savedExpenditure
+}
+const updateExpenditure = async (req: Request) => {
+  const { name, tsId, amount, dateSpinding, userId } = req.body
+  const { id } = req.params // Get id  from URL parameters
+
+  if (!id || amount < 0) {
+    throw new BadRequestError('Dữ liệu từ req không hợp lệ!')
+  }
+
+  const user = await userRepository.findOne({ where: { id: userId } })
+  if (!user) throw new NotFoundError('Không tìm thấy người dùng!')
+
+  // Find the expenditure to update
+  const expenditure = await expenditureRepository.findOne({
+    where: { id: parseInt(id) },
+    relations: ['typeSprinding', 'user']
+  })
+
+  if (!expenditure) {
+    throw new NotFoundError('Không tìm thấy khoản chi tiêu!')
+  }
+
+  // If a new type ID is provided, validate and update it
+  if (tsId) {
     const typeSprinding = await typeSprindingRepository.findOne({
-      where: { id: tsId }
+      where: { id: tsId.id }
     })
     if (!typeSprinding) {
       throw new NotFoundError('Không tìm thấy loại chi tiêu!')
     }
-
-    const newExpenditure: Expenditure = expenditureRepository.create({
-      name,
-      typeSprinding,
-      amount: +amount,
-      dateSpinding: dateSpinding,
-      user,
-      paymentType: false
-    })
-    const savedExpenditure = await expenditureRepository.save(newExpenditure)
-
-    await NotificationService.createNotification(newExpenditure)
-
-    return savedExpenditure
-  } catch (error) {
-    throw error
+    expenditure.typeSprinding = typeSprinding
   }
-}
-const updateExpenditure = async (req: Request) => {
-  try {
-    const { name, tsId, amount, dateSpinding } = req.body
-    const { id } = req.params // Get id  from URL parameters
+  // Update other fields if provided
+  user.currentBalance = Number(user.currentBalance) + Number(expenditure.amount) - Number(amount)
+  if (name) expenditure.name = name
+  if (amount) expenditure.amount = +amount
+  if (dateSpinding) expenditure.dateSpinding = addSevenHours(new Date(dateSpinding))
 
-    if (!id || amount < 0) {
-      throw new BadRequestError('Dữ liệu từ req không hợp lệ!')
-    }
 
-    // Find the expenditure to update
-    const expenditure = await expenditureRepository.findOne({
-      where: { id: parseInt(id) },
-      relations: ['typeSprinding', 'user']
-    })
+  // Save the updated expenditure
+  await expenditureRepository.save(expenditure)
 
-    if (!expenditure) {
-      throw new NotFoundError('Không tìm thấy khoản chi tiêu!')
-    }
+  // Update current balance
+  await userRepository.save(user)
 
-    // If a new type ID is provided, validate and update it
-    if (tsId) {
-      const typeSprinding = await typeSprindingRepository.findOne({
-        where: { id: tsId }
-      })
-      if (!typeSprinding) {
-        throw new NotFoundError('Không tìm thấy loại chi tiêu!')
-      }
-      expenditure.typeSprinding = typeSprinding
-    }
-    const ts = await TypeSprindingService.getTypeSprindingById(
-      expenditure?.typeSprinding.id
-    )
-    expenditure.typeSprinding = ts
-    // Update other fields if provided
-    if (name) expenditure.name = name
-    if (amount) expenditure.amount = +amount
-    if (dateSpinding)
-      expenditure.dateSpinding = addSevenHours(new Date(dateSpinding))
-
-    // Save the updated expenditure
-    const updatedExpenditure = await expenditureRepository.save(expenditure)
-
-    return await expenditureRepository.findOne({
-      where: { id: updatedExpenditure.id },
-      relations: [
-        'typeSprinding',
-        'user',
-        'typeSprinding.color',
-        'typeSprinding.icon'
-      ],
-      order: {
-        dateSpinding: 'DESC'
-      }
-    })
-  } catch (error) {
-    throw error
-  }
+  return { message: 'Sửa khoản chi tiêu thành công!' }
 }
 const deleteExpenditure = async (req: Request) => {
-  try {
-    const { id } = req.params // Get id from URL parameters
-
-    if (!id) {
-      throw new BadRequestError('id không hợp lệ!')
-    }
-
-    // Find the expenditure to delete
-    const expenditure = await expenditureRepository.findOne({
-      where: { id: parseInt(id) }
-    })
-    if (!expenditure) {
-      throw new NotFoundError('Không tìm thấy khoản chi tiêu!')
-    }
-
-    // Delete the expenditure
-    await expenditureRepository.remove(expenditure)
-
-    return { message: 'Xóa khoản chi tiêu thành công!' }
-  } catch (error) {
-    throw error
+  const { id } = req.params // Get id from URL parameters
+  const { userId } = req.query
+  if (!id) {
+    throw new BadRequestError('id không hợp lệ!')
   }
+
+  const user = await userRepository.findOne({ where: { id: Number(userId) } })
+  if (!user) throw new NotFoundError('Không tìm thấy người dùng!')
+
+  // Find the expenditure to delete
+  const expenditure = await expenditureRepository.findOne({
+    where: { id: parseInt(id) }
+  })
+  if (!expenditure) {
+    throw new NotFoundError('Không tìm thấy khoản chi tiêu!')
+  }
+
+  // Delete the expenditure
+  await expenditureRepository.remove(expenditure)
+
+  // Update current balance
+  user.currentBalance = Number(user.currentBalance) + Number(expenditure.amount)
+  await userRepository.save(user)
+
+  return { message: 'Xóa khoản chi tiêu thành công!' }
 }
 
 const getAllExpenditures = async (req: Request) => {
-  try {
-    const userId = req.query.userId as string
-    const tsId = req.query.tsId as string
-    let expenditures: Expenditure[] = []
+  const userId = req.query.userId as string
+  const tsId = req.query.tsId as string
+  let expenditures: Expenditure[] = []
 
-    // Validate userId
-    if (!userId) {
-      throw new BadRequestError('UserId rỗng')
-    }
-
-    // Find user
-    const user = await userRepository.findOne({ where: { id: Number(userId) } })
-    if (!user) {
-      throw new NotFoundError('Người dùng không tìm thấy!')
-    }
-
-    // Fetch expenditures based on userId and optional tsId
-    if (tsId) {
-      // Validate tsId
-      if (isNaN(Number(tsId))) {
-        throw new BadRequestError('tsId không hợp lệ')
-      }
-
-      expenditures = await expenditureRepository.find({
-        where: {
-          user: { id: Number(userId) },
-          typeSprinding: { id: Number(tsId) }
-        },
-        relations: [
-          'typeSprinding',
-          'typeSprinding.color',
-          'typeSprinding.icon'
-        ],
-        order: {
-          dateSpinding: 'DESC'
-        }
-      })
-    } else {
-      expenditures = await expenditureRepository.find({
-        where: { user: { id: Number(userId) } },
-        relations: [
-          'typeSprinding',
-          'typeSprinding.color',
-          'typeSprinding.icon'
-        ],
-        order: {
-          dateSpinding: 'DESC'
-        }
-      })
-    }
-
-    return expenditures
-  } catch (error) {
-    throw error
+  // Validate userId
+  if (!userId) {
+    throw new BadRequestError('UserId rỗng')
   }
-}
 
-const getExpenditureById = async (req: Request) => {
-  try {
-    const exId = req.params.id
-    if (!exId) {
-      throw new BadRequestError('Id Khoản chi tiêu rỗng')
+  // Find user
+  const user = await userRepository.findOne({ where: { id: Number(userId) } })
+  if (!user) {
+    throw new NotFoundError('Người dùng không tìm thấy!')
+  }
+
+  // Fetch expenditures based on userId and optional tsId
+  if (tsId) {
+    // Validate tsId
+    if (isNaN(Number(tsId))) {
+      throw new BadRequestError('tsId không hợp lệ')
     }
-    const expenditureId = Number(exId) // Convert to number
-    if (isNaN(expenditureId)) {
-      throw new BadRequestError('Id Khoản chi tiêu không hợp lệ')
-    }
-    const expenditure = await expenditureRepository.findOne({
-      where: { id: +exId },
+
+    expenditures = await expenditureRepository.find({
+      where: {
+        user: { id: Number(userId) },
+        typeSprinding: { id: Number(tsId) }
+      },
       relations: ['typeSprinding', 'typeSprinding.color', 'typeSprinding.icon'],
       order: {
         dateSpinding: 'DESC'
       }
     })
-    return expenditure
-  } catch (error) {
-    throw error
+  } else {
+    expenditures = await expenditureRepository.find({
+      where: { user: { id: Number(userId) } },
+      relations: ['typeSprinding', 'typeSprinding.color', 'typeSprinding.icon'],
+      order: {
+        dateSpinding: 'DESC'
+      }
+    })
   }
+
+  return expenditures
+}
+
+const getExpenditureById = async (req: Request) => {
+  const exId = req.params.id
+  if (!exId) {
+    throw new BadRequestError('Id Khoản chi tiêu rỗng')
+  }
+  const expenditureId = Number(exId) // Convert to number
+  if (isNaN(expenditureId)) {
+    throw new BadRequestError('Id Khoản chi tiêu không hợp lệ')
+  }
+  const expenditure = await expenditureRepository.findOne({
+    where: { id: +exId },
+    relations: ['typeSprinding', 'typeSprinding.color', 'typeSprinding.icon'],
+    order: {
+      dateSpinding: 'DESC'
+    }
+  })
+  return expenditure
 }
 export const ExpenditureService = {
   createExpenditure,

@@ -8,5 +8,6 @@ router
   .route('/')
   .post(accountValidation.createAccount, AccountController.createAccount)
 router.route('/').get(AccountController.getAllAccounts)
+router.route('/id').get(AccountController.getAccountById)
 
 export default router

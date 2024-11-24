@@ -1,0 +1,20 @@
+services:
+  kinu_db:
+    image: mysql:latest
+    container_name: kinu_db
+    restart: always
+    environment:
+      - MYSQL_DATABASE=kinu
+      - MYSQL_USER=kinu
+      - MYSQL_PASSWORD=kinu
+      - MYSQL_ROOT_PASSWORD=kinu
+    ports:
+      - '3307:3306'
+    volumes:
+      - kinu_db_data:/var/lib/mysql
+      - ./database/V01__ALL_TABLES_create.sql:/docker-entrypoint-initdb.d/V01__ALL_TABLES_create.sql
+    command: [ 'mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci' ]
+
+volumes:
+  kinu_db_data:
+    driver: local

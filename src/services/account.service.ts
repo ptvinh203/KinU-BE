@@ -43,14 +43,14 @@ const createAccount = async (req: Request) => {
     const iconRepo = AppDataSource.getRepository(Icon)
 
     const defaultColor = await colorRepo.findOne({ where: { id: 1 } })
-    if(!defaultColor){
+    if (!defaultColor) {
       throw new NotFoundError("Không tìm thấy color!")
     }
     const defaultIcon = await iconRepo.findOne({ where: { id: 1 } })
-    if(!defaultIcon){
+    if (!defaultIcon) {
       throw new NotFoundError("Không tìm thấy icon!")
     }
-    
+
     const newTypeSprinding = typeSprindingRepo.create({
       name: "Chi tiêu khác",
       estimatedAmount: +0,
@@ -77,7 +77,17 @@ const getAllAccounts = async (req: Request) => {
   }
 }
 
+const getAccountById = async (req: Request) => {
+  const { id } = req.query
+  const account = await userRepo.findOne({ where: { id: Number(id) } })
+  if (!account) {
+    throw new NotFoundError('Không tìm thấy tài khoản!')
+  }
+  return account
+}
+
 export const AccountService = {
   createAccount,
-  getAllAccounts
+  getAllAccounts,
+  getAccountById
 }

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column,OneToMany  } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm'
 import { Notification } from './Notification'
 import { EWallet } from './EWallet'
 
@@ -26,7 +26,10 @@ export class Account {
   birthday: Date
 
   @Column({ type: 'int' })
-  gender: number 
+  gender: number
+
+  @Column({ type: 'bigint' })
+  currentBalance: number
 
   @OneToMany(() => Notification, (notification) => notification.user)
   notifications: Notification[];

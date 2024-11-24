@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { AccountService } from '@src/services/account.service';
 import { StatusCodes } from 'http-status-codes';
 
-const createAccount = async (req: Request, res: Response, next: NextFunction ) => {
+const createAccount = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const result = await AccountService.createAccount(req);
     res.status(StatusCodes.CREATED).json({
@@ -15,18 +15,31 @@ const createAccount = async (req: Request, res: Response, next: NextFunction ) =
 };
 
 const getAllAccounts = async (req: Request, res: Response, next: NextFunction) => {
-  try{
+  try {
     const result = await AccountService.getAllAccounts(req);
     res.status(StatusCodes.CREATED).json({
       status: "OK",
       data: result
     });
-  }catch(error){
+  } catch (error) {
     next(error);
+  }
+}
+
+const getAccountById = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await AccountService.getAccountById(req)
+    res.status(StatusCodes.CREATED).json({
+      status: 'OK',
+      data: result
+    })
+  } catch (error) {
+    next(error)
   }
 }
 
 export const AccountController = {
   createAccount,
-    getAllAccounts
+  getAllAccounts,
+  getAccountById
 }

@@ -30,7 +30,7 @@ CREATE TABLE `color` (
 --
 CREATE TABLE `e_wallet` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `phone` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `phone` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL UNIQUE,
   `pinCode` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `balance` decimal(15,2) NOT NULL,
   `userId` int DEFAULT NULL,

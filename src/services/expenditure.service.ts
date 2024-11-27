@@ -1,4 +1,3 @@
-import { Notification } from '@src/models/Notification'
 import { AppDataSource } from '@src/config/data-source'
 import BadRequestError from '@src/errors/BadRequestError'
 import NotFoundError from '@src/errors/NotFoundError'
@@ -8,7 +7,6 @@ import { TypeSprinding } from '@src/models/TypeSprinding'
 import addSevenHours from '@src/utils/addSevenHours'
 import { Request } from 'express'
 import { NotificationService } from './notification.service'
-import { TypeSprindingService } from './typeSprinding.service'
 
 const expenditureRepository = AppDataSource.getRepository(Expenditure)
 const typeSprindingRepository = AppDataSource.getRepository(TypeSprinding)
@@ -89,12 +87,11 @@ const updateExpenditure = async (req: Request) => {
   if (amount) expenditure.amount = +amount
   if (dateSpinding) expenditure.dateSpinding = addSevenHours(new Date(dateSpinding))
 
-
   // Save the updated expenditure
   await expenditureRepository.save(expenditure)
 
   // Update current balance
-  await userRepository.save(user)
+  if (expenditure.paymentType === false) await userRepository.save(user)
 
   return { message: 'Sửa khoản chi tiêu thành công!' }
 }
@@ -121,7 +118,7 @@ const deleteExpenditure = async (req: Request) => {
 
   // Update current balance
   user.currentBalance = Number(user.currentBalance) + Number(expenditure.amount)
-  await userRepository.save(user)
+  if (expenditure.paymentType === false) await userRepository.save(user)
 
   return { message: 'Xóa khoản chi tiêu thành công!' }
 }
